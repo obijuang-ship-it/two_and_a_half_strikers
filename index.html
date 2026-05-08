@@ -262,29 +262,31 @@ async function syncAll(){
   const btn=document.getElementById('sync-btn');
   const icon=document.getElementById('sync-icon');
   btn.disabled=true;icon.className='spin-anim';icon.textContent='\u21bb';
-  let ok=0,fail=0;
-  for(let i=0;i<state.length;i++){
-    try{state[i].goles=await fetchGoals(state[i].fotmobId);ok++;}
-    catch(e){fail++;}
+  try{
+    const r=await fetch('goles.json?_='+Date.now());
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    let updated=null;
+    for(const d of data){
+      if(d.updated){updated=d.updated;continue;}
+      const idx=state.findIndex(p=>p.fotmobId===d.fotmobId);
+      if(idx>=0 && d.goles!=null) state[idx].goles=d.goles;
+    }
+    save();render();
+    const el=document.getElementById('verdict');
+    const old=el.querySelector('.sync-status');if(old)old.remove();
+    const span=document.createElement('div');span.className='sync-status';
+    const t=updated?new Date(updated).toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+    span.textContent='\u2713 Actualizado '+t;
+    el.appendChild(span);
+  }catch(e){
+    const el=document.getElementById('verdict');
+    const old=el.querySelector('.sync-status');if(old)old.remove();
+    const span=document.createElement('div');span.className='sync-status';
+    span.textContent='Error al cargar datos';
+    el.appendChild(span);
   }
-  save();render();
   btn.disabled=false;icon.className='';icon.textContent='\u21bb';
-  const t=new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
-  const el=document.getElementById('verdict');
-  const old=el.querySelector('.sync-status');if(old)old.remove();
-  const span=document.createElement('div');span.className='sync-status';
-  span.textContent=fail===0?`\u2713 Actualizado a las ${t}`:`${ok} ok \u00b7 ${fail} con error \u00b7 ${t}`;
-  el.appendChild(span);
-}
-
-async function fetchGoals(id){
-  const r=await fetch(`https://fotmob-proxy.obijuang.workers.dev/?id=${id}`);
-  if(!r.ok)throw new Error();
-  const d=await r.json();
-  let g=0;
-  const entries=(d?.careerStatistics?.seasonEntries||[])[0]?.entries||[];
-  for(const e of entries)g+=(e.stats?.Goals||0);
-  return g;
 }
 
 async function openProfile(idx){
