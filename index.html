@@ -47,7 +47,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border2) 30%,var(--border2) 70%,transparent);margin:1.25rem 1.25rem 0}
 
 .verdict{margin:1.25rem 1.25rem 0;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.875rem 1.25rem;display:flex;flex-direction:column;gap:5px}
-.v-line{font-size:15px;color:var(--text2);display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.v-line{font-size:15px;color:var(--text2);display:flex;align-items:center;gap:8px}
 .v-line strong{color:var(--text);font-weight:600}
 .v-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .v-dot.g{background:var(--green)}
@@ -252,8 +252,8 @@ function renderVerdict(){
   if(tied){el.innerHTML=`<div class="v-line"><span class="v-dot y"></span> Empate total \u2014 la temporada est\u00e1 abierta</div>`;return;}
   const diff=r[0].goles-r[r.length-1].goles;
   el.innerHTML=`
-    <div class="v-line"><span class="v-dot r"></span> <strong>${r[r.length-1].owner}</strong> va pagando \u2014 ${r[r.length-1].name}, ${r[r.length-1].goles} goles</div>
-    <div class="v-line"><span class="v-dot g"></span> <strong>${r[0].owner}</strong> elige restaurante \u2014 ${r[0].name}, ${r[0].goles} goles</div>
+    <div class="v-line"><span class="v-dot r"></span> <strong>${r[r.length-1].owner}</strong> va pagando la cena</div>
+    <div class="v-line"><span class="v-dot g"></span> <strong>${r[0].owner}</strong> elige el restaurante</div>
     <div class="v-line"><span class="v-dot y"></span> Diferencia: <strong>${diff} gol${diff!==1?'es':''}</strong></div>`;
 }
 
