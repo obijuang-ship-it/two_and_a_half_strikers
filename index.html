@@ -270,7 +270,12 @@ async function syncAll(){
     for(const d of data){
       if(d.updated){updated=d.updated;continue;}
       const idx=state.findIndex(p=>p.fotmobId===d.fotmobId);
-      if(idx>=0 && d.goles!=null) state[idx].goles=d.goles;
+      if(idx>=0){
+        if(d.goles!=null) state[idx].goles=d.goles;
+        if(d.asistencias!=null) state[idx].asistencias=d.asistencias;
+        if(d.partidos!=null) state[idx].partidos=d.partidos;
+        if(d.radar) state[idx].radar=d.radar;
+      }
     }
     save();render();
     const el=document.getElementById('verdict');
@@ -293,75 +298,34 @@ async function openProfile(idx){
   const p=state[idx];
   const overlay=document.getElementById('overlay');
   const sc=document.getElementById('sheet-content');
-  sc.innerHTML=`<div class="sheet-loading"><span class="spin-anim">\u21bb</span> Cargando ${p.name}...</div>`;
   overlay.classList.add('open');
   document.body.style.overflow='hidden';
-  try{
-    const r=await fetch(`https://fotmob-proxy.obijuang.workers.dev/?id=${p.fotmobId}`);
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    const d=await r.json();
-    sc.innerHTML=buildProfile(p,d);
-  }catch(e){
-    sc.innerHTML=`
-      <div class="sheet-header">
-        <div><div class="sh-name">${p.name}</div><div class="sh-sub">Para ${p.owner}</div></div>
-        <button class="sh-close" onclick="closeProfile()">\u2715</button>
-      </div>
-      <div class="sheet-error">
-        No se pudo conectar con FotMob.<br>Puede ser un problema de CORS.<br><br>
-        <a href="https://www.fotmob.com/players/${p.fotmobId}" target="_blank" style="color:var(--green);text-decoration:none;">Ver en FotMob \u2192</a>
-      </div>`;
-  }
+  sc.innerHTML=buildProfile(p);
 }
 
-function buildProfile(p,d){
-  const info=d?.playerInformation||{};
-  const team=d?.primaryTeam?.teamName||'\u2014';
-  const age=info?.age?.fallback||'\u2014';
-  const height=info?.height?.fallback||'\u2014';
-  const foot=info?.preferredFoot?.fallback||'\u2014';
-  const nat=info?.nationality?.country||'\u2014';
-  const shirt=d?.shirtNumber||'\u2014';
-  const contract=info?.contractUntil?.fallback||'\u2014';
-  const sdata=d?.mainLeague?.stats?.statsData||[];
-  const gv=sv(sdata,'Goals')??p.goles;
-  const av=sv(sdata,'Assists')??'\u2014';
-  const pjv=sv(sdata,'Matches played')??'\u2014';
-  const mv=sv(sdata,'Minutes played');
-  const sov=sv(sdata,'Shots on target')??'\u2014';
-  const xgv=sv(sdata,'Expected goals (xG)')??'\u2014';
-  const radarHTML=buildRadar(d);
+function buildProfile(p){
+  const gv=p.goles??0;
+  const av=p.asistencias!=null?p.asistencias:'—';
+  const pjv=p.partidos!=null?p.partidos:'—';
+  const radarHTML=buildRadar(p.radar||[]);
   return `
     <div class="sheet-header">
-      <div><div class="sh-name">${p.name}</div><div class="sh-sub">${team} \u00b7 Elegido por ${p.owner}</div></div>
-      <button class="sh-close" onclick="closeProfile()">\u2715</button>
+      <div>
+        <div class="sh-name">${p.name}</div>
+        <div class="sh-sub">Elegido por ${p.owner}</div>
+      </div>
+      <button class="sh-close" onclick="closeProfile()">✕</button>
     </div>
     <div class="sheet-body">
-      <div class="sec-label">Perfil</div>
-      <div class="bio-row">
-        <div class="bio-pill"><div class="bio-v">${age}</div><div class="bio-l">Edad</div></div>
-        <div class="bio-pill"><div class="bio-v">${height}</div><div class="bio-l">Altura</div></div>
-        <div class="bio-pill"><div class="bio-v">${shirt}</div><div class="bio-l">Dorsal</div></div>
-        <div class="bio-pill"><div class="bio-v">${foot}</div><div class="bio-l">Pie</div></div>
-        <div class="bio-pill"><div class="bio-v">${nat}</div><div class="bio-l">Pa\u00eds</div></div>
-        <div class="bio-pill"><div class="bio-v">${contract}</div><div class="bio-l">Contrato</div></div>
-      </div>
-      <div class="sec-label">Temporada 24/25</div>
+      <div class="sec-label">Temporada 25/26</div>
       <div class="stat-row">
         <div class="sbox hl"><div class="sbox-v">${gv}</div><div class="sbox-l">Goles</div></div>
         <div class="sbox"><div class="sbox-v">${av}</div><div class="sbox-l">Asist.</div></div>
         <div class="sbox"><div class="sbox-v">${pjv}</div><div class="sbox-l">PJ</div></div>
-        <div class="sbox"><div class="sbox-v">${mv!==null?mv+'\u2032':'\u2014'}</div><div class="sbox-l">Minutos</div></div>
-      </div>
-      <div class="sec-label">M\u00e1s stats</div>
-      <div class="stat-row" style="grid-template-columns:repeat(2,1fr);margin-bottom:1.25rem">
-        <div class="sbox"><div class="sbox-v">${sov}</div><div class="sbox-l">Tiros a puerta</div></div>
-        <div class="sbox"><div class="sbox-v">${xgv}</div><div class="sbox-l">xG</div></div>
       </div>
       ${radarHTML}
-      <a class="fotmob-link" href="https://www.fotmob.com/players/${p.fotmobId}" target="_blank">Ver perfil completo en FotMob \u2192</a>
-    </div>`;
-}
+      <a class="fotmob-link" href="https://www.fotmob.com/es/players/${p.fotmobId}" target="_blank" style="margin-top:.5rem;display:block;">Ver perfil completo en FotMob →</a>
+    </div>`;}
 
 function sv(arr,key){
   const f=arr.find(x=>x.title===key||x.key===key||x.name===key);
@@ -370,23 +334,13 @@ function sv(arr,key){
   return v!=null?v:null;
 }
 
-function buildRadar(d){
-  let traits=null;
-  if(Array.isArray(d?.playerTraits)&&d.playerTraits.length>2)traits=d.playerTraits;
-  else if(Array.isArray(d?.traits)&&d.traits.length>2)traits=d.traits;
-  else if(Array.isArray(d?.radarData)&&d.radarData.length>2)traits=d.radarData;
-  if(!traits){
+function buildRadar(data){
+  if(!data||data.length<3){
     return `<div class="radar-card">
       <div class="radar-ttl">Rasgos del jugador</div>
-      <div style="padding:1.5rem 0;text-align:center;color:var(--text3);font-size:12px">Datos de percentiles no disponibles</div>
-    </div>`;
-  }
-  const data=traits.map(t=>({
-    label:t.title||t.name||'',
-    val:Math.min(100,Math.max(0,Math.round(t.value||t.percentile||0)))
-  })).slice(0,6);
+      <div style="padding:1.5rem 0;text-align:center;color:var(--text3);font-size:12px">Actualiza los datos para ver el radar</div>
+    </div>`;}
   const N=data.length;
-  if(N<3)return '';
   const cx=150,cy=140,R=95;
   const angles=data.map((_,i)=>(Math.PI*2*i/N)-Math.PI/2);
   const pt=(i,pct)=>{const rr=R*(pct/100);return[cx+rr*Math.cos(angles[i]),cy+rr*Math.sin(angles[i])];};
@@ -415,8 +369,7 @@ function buildRadar(d){
     <svg class="radar-svg" viewBox="0 0 300 280" width="100%" style="max-width:300px">
       ${rings}${axes}${poly}${dots}${labels}
     </svg>
-  </div>`;
-}
+  </div>`;}
 
 function closeProfile(){
   document.getElementById('overlay').classList.remove('open');
