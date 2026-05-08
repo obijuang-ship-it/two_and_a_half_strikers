@@ -195,9 +195,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 
 <script>
 const PLAYERS = [
-  {owner:'Juan Carlos', name:'Luis Su\u00e1rez',    fotmobId:'792303', goles:0},
-  {owner:'Adolfo',      name:'Du\u0161an Vlahovi\u0107', fotmobId:'737857', goles:0},
-  {owner:'Yeye',        name:'Kylian Mbapp\u00e9',  fotmobId:'701154', goles:0},
+  {owner:'Juan Carlos', name:'Luis Su\u00e1rez',    fotmobId:'792303', goles:0, img:'https://images.fotmob.com/image_resources/playerimages/792303.png'},
+  {owner:'Adolfo',      name:'Du\u0161an Vlahovi\u0107', fotmobId:'737857', goles:0, img:'https://images.fotmob.com/image_resources/playerimages/737857.png'},
+  {owner:'Yeye',        name:'Kylian Mbapp\u00e9',  fotmobId:'701154', goles:0, img:'https://images.fotmob.com/image_resources/playerimages/701154.png'},
 ];
 
 let state=[];
@@ -223,10 +223,13 @@ function renderCards(){
     const pct=Math.round((p.goles/mx)*100);
     return `<div class="pcard ${cls}" onclick="openProfile(${i})">
       <div class="pcard-inner">
-        <div class="pcard-left">
-          <div class="pcard-meta"><span class="pcard-rank ${rankCls}">${rankLabel}</span></div>
-          <div class="pcard-owner">${p.owner}</div>
-          <div class="pcard-player">${p.name}</div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <img src="${p.img}" alt="${p.name}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;background:var(--border);flex-shrink:0;" onerror="this.style.display='none'">
+          <div class="pcard-left">
+            <div class="pcard-meta"><span class="pcard-rank ${rankCls}">${rankLabel}</span></div>
+            <div class="pcard-owner">${p.owner}</div>
+            <div class="pcard-player">${p.name}</div>
+          </div>
         </div>
         <div class="pcard-right">
           <div class="pcard-goals">${p.goles}</div>
