@@ -512,7 +512,7 @@ function renderWithData(players, readonly) {
   document.getElementById('cards').innerHTML = players.map((p, i) => {
     const pos = tied ? -1 : r.findIndex(x => x.fotmobId === p.fotmobId) + 1;
     const cls = pos === 1 ? 'first' : pos === 3 ? 'last' : 'mid';
-    const rankLabel = pos === 1 ? 'Líder' : pos === 2 ? 'En juego' : pos === 3 ? 'Último' : '—';
+    const rankLabel = pos === 1 ? (readonly ? 'Ganador' : 'Líder') : pos === 2 ? (readonly ? '2º' : 'En juego') : pos === 3 ? (readonly ? '3º' : 'Último') : '—';
     const rankCls = pos === 1 ? 'rank-1' : pos === 3 ? 'rank-3' : 'rank-2';
     const pct = Math.round((p.goles / mx) * 100);
     return `<div class="pcard ${cls}" onclick="openProfileData(${JSON.stringify(p).replace(/"/g, '&quot;')})">
@@ -547,9 +547,11 @@ function renderWithData(players, readonly) {
     return;
   }
   const diff = r[0].goles - r[r.length-1].goles;
+  const pagando = readonly ? 'pagó la cena' : 'va pagando la cena';
+  const eligiendo = readonly ? 'eligió el restaurante' : 'elige el restaurante';
   el.innerHTML = `
-    <div class="v-line"><span class="v-dot r"></span> <strong>${r[r.length-1].owner}</strong> va pagando la cena</div>
-    <div class="v-line"><span class="v-dot g"></span> <strong>${r[0].owner}</strong> elige el restaurante</div>
+    <div class="v-line"><span class="v-dot r"></span> <strong>${r[r.length-1].owner}</strong> ${pagando}</div>
+    <div class="v-line"><span class="v-dot g"></span> <strong>${r[0].owner}</strong> ${eligiendo}</div>
     <div class="v-line"><span class="v-dot y"></span> Diferencia: <strong>${diff} gol${diff!==1?'es':''}</strong></div>
     ${readonly ? '<div class="sync-status">Temporada finalizada</div>' : ''}`;
 }
