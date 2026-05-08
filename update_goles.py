@@ -1,72 +1,104 @@
 import requests
 import json
-import base64
-import os
+import re
 import time
+import os
+import base64
 from datetime import datetime
 
-# ── CONFIG ──────────────────────────────────────────────
+# === CONFIGURACIÓN ===
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
-REPO         = "obijuang-ship-it/two_and_a_half_strikers"
-JSON_PATH    = "goles.json"
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
+CHAT_ID = os.environ.get("CHAT_ID", "")
+REPO = "obijuang-ship-it/two_and_a_half_strikers"
+JSON_PATH = "goles.json"
 
 PLAYERS = [
-    {"owner": "Juan Carlos", "name": "Luis Suárez",     "fotmobId": "792303"},
-    {"owner": "Adolfo",      "name": "Dušan Vlahović",  "fotmobId": "737857"},
-    {"owner": "Yeye",        "name": "Kylian Mbappé",   "fotmobId": "701154"},
+    {"owner": "Juan Carlos", "name": "Luis Suárez",    "fotmobId": "792303", "slug": "luis-suarez"},
+    {"owner": "Adolfo",      "name": "Dušan Vlahović", "fotmobId": "737857", "slug": "dusan-vlahovic"},
+    {"owner": "Yeye",        "name": "Kylian Mbappé",  "fotmobId": "701154", "slug": "kylian-mbappe"},
 ]
-# ────────────────────────────────────────────────────────
+
+HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
 
 
-def get_fotmob_token():
-    """Get FotMob auth token from their init endpoint"""
-    session = requests.Session()
-    session.headers.update({
-        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
-        "Accept": "application/json, text/plain, */*",
-        "Accept-Language": "es-ES,es;q=0.9",
-        "Origin": "https://www.fotmob.com",
-        "Referer": "https://www.fotmob.com/",
-    })
-    # Visit homepage first to get cookies
-    session.get("https://www.fotmob.com", timeout=10)
-    time.sleep(1)
-    return session
+def find_season_entries(obj):
+    if isinstance(obj, dict):
+        if "seasonEntries" in obj:
+            return obj["seasonEntries"]
+        for v in obj.values():
+            res = find_season_entries(v)
+            if res:
+                return res
+    elif isinstance(obj, list):
+        for item in obj:
+            res = find_season_entries(item)
+            if res:
+                return res
+    return None
 
 
-def fetch_goals(session, fotmob_id):
-    url = f"https://www.fotmob.com/api/playerData?id={fotmob_id}"
-    r = session.get(url, timeout=15)
-    print(f"  Status: {r.status_code}, Content-Type: {r.headers.get('Content-Type','')}")
-    if r.status_code != 200:
-        raise Exception(f"HTTP {r.status_code}")
-    
-    # Check if we got JSON or HTML
-    ct = r.headers.get('Content-Type', '')
-    if 'html' in ct:
-        raise Exception("Got HTML instead of JSON — blocked")
-    
+def fetch_player_stats(pid, slug):
+    html_url = f"https://www.fotmob.com/es/players/{pid}/{slug}"
+    html = requests.get(html_url, headers=HEADERS, timeout=15)
+    html.raise_for_status()
+
+    match = re.search(r'"buildId":"(.*?)"', html.text)
+    if not match:
+        raise Exception("No se encontró buildId")
+    build_id = match.group(1)
+
+    json_url = f"https://www.fotmob.com/_next/data/{build_id}/es/players/{pid}/{slug}.json"
+    r = requests.get(json_url, headers=HEADERS, timeout=15)
+    r.raise_for_status()
     data = r.json()
-    total = 0
-    entries = (data.get("careerStatistics", {})
-                   .get("seasonEntries", [{}])[0]
-                   .get("entries", []))
-    for e in entries:
-        total += e.get("stats", {}).get("Goals", 0)
-    return total
+
+    season_entries = find_season_entries(data)
+    if not season_entries:
+        raise KeyError("No se encontró 'seasonEntries'")
+
+    selected = None
+    for s in season_entries:
+        if "2025/2026" in s.get("seasonName", ""):
+            selected = s
+            break
+    if not selected and season_entries:
+        selected = season_entries[-1]
+
+    goals = assists = matches = 0
+    if selected:
+        goals   = int(selected.get("goals", 0))
+        assists = int(selected.get("assists", 0))
+        matches = int(selected.get("appearances", 0))
+
+        if not any([goals, assists, matches]):
+            for stat in selected.get("teamStats", []):
+                title = stat.get("title", "").lower()
+                if "goles" in title or "goals" in title:
+                    goals = int(stat.get("value", 0))
+                elif "asist" in title:
+                    assists = int(stat.get("value", 0))
+                elif "partidos" in title or "apps" in title or "appearances" in title:
+                    matches = int(stat.get("value", 0))
+
+    return {"goles": goals, "asistencias": assists, "partidos": matches}
 
 
-def get_file_sha():
+def get_github_file():
     url = f"https://api.github.com/repos/{REPO}/contents/{JSON_PATH}"
     r = requests.get(url, headers={"Authorization": f"token {GITHUB_TOKEN}"})
     if r.status_code == 200:
-        return r.json()["sha"]
-    return None
+        data = r.json()
+        content = json.loads(base64.b64decode(data["content"]).decode())
+        return content, data["sha"]
+    return [], None
 
 
 def push_json(content, sha):
     url = f"https://api.github.com/repos/{REPO}/contents/{JSON_PATH}"
-    encoded = base64.b64encode(json.dumps(content, ensure_ascii=False, indent=2).encode()).decode()
+    encoded = base64.b64encode(
+        json.dumps(content, ensure_ascii=False, indent=2).encode()
+    ).decode()
     payload = {
         "message": f"update: goles {datetime.utcnow().strftime('%Y-%m-%d %H:%M')} UTC",
         "content": encoded,
@@ -78,36 +110,69 @@ def push_json(content, sha):
     print("✓ goles.json actualizado en GitHub")
 
 
-def main():
-    print("Iniciando sesión en FotMob...")
-    session = get_fotmob_token()
-    
-    # Load existing goles to keep last known values if fetch fails
-    sha = get_file_sha()
-    existing = {}
-    if sha:
-        url = f"https://api.github.com/repos/{REPO}/contents/{JSON_PATH}"
-        r = requests.get(url, headers={"Authorization": f"token {GITHUB_TOKEN}"})
-        if r.status_code == 200:
-            raw = base64.b64decode(r.json()["content"]).decode()
-            for item in json.loads(raw):
-                if "fotmobId" in item and item.get("goles") is not None:
-                    existing[item["fotmobId"]] = item["goles"]
+def send_telegram(msg):
+    if not TELEGRAM_TOKEN or not CHAT_ID:
+        print("⚠️  Sin token de Telegram, no se envía notificación")
+        return
+    requests.get(
+        f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
+        params={"chat_id": CHAT_ID, "text": msg},
+        timeout=10
+    )
+    print(f"📢 Telegram: {msg}")
 
-    print("Consultando FotMob...")
+
+def main():
+    print("⚽ Extrayendo estadísticas desde FotMob…\n")
+
+    old_data, sha = get_github_file()
+    old_goals = {}
+    for item in old_data:
+        if "fotmobId" in item:
+            old_goals[item["fotmobId"]] = item.get("goles", 0)
+
     result = []
+    nuevos_goles = []
+
     for p in PLAYERS:
+        print(f"Buscando {p['name']}…")
         try:
-            time.sleep(1)  # be polite
-            goles = fetch_goals(session, p["fotmobId"])
-            print(f"  ✓ {p['name']}: {goles} goles")
+            stats = fetch_player_stats(p["fotmobId"], p["slug"])
+            goles = stats["goles"]
+            print(f"  ✓ {p['name']}: {goles} goles · {stats['asistencias']} asist · {stats['partidos']} PJ")
+
+            prev = old_goals.get(p["fotmobId"], 0)
+            if goles > prev:
+                nuevos_goles.append((p["name"], p["owner"], goles - prev))
+
         except Exception as e:
-            print(f"  ✗ {p['name']}: ERROR ({e}) — manteniendo valor anterior")
-            goles = existing.get(p["fotmobId"], 0)
-        result.append({**p, "goles": goles})
+            print(f"  ✗ Error: {e} — manteniendo valor anterior")
+            goles = old_goals.get(p["fotmobId"], 0)
+            stats = {"goles": goles, "asistencias": 0, "partidos": 0}
+
+        result.append({
+            "owner":    p["owner"],
+            "name":     p["name"],
+            "fotmobId": p["fotmobId"],
+            "goles":    stats["goles"],
+        })
+        time.sleep(1)
 
     result.append({"updated": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")})
     push_json(result, sha)
+
+    # Notificaciones Telegram
+    if nuevos_goles:
+        for name, owner, n in nuevos_goles:
+            mensajes = [
+                f"⚽ ¡{name} ha marcado {n} gol{'es' if n > 1 else ''}! Entra a la app a ver cómo va la apuesta 👀",
+                f"🔥 ¡Goool de {name}! ¿Quién va pagando la cena? Compruébalo en la app 🍽️",
+                f"💥 {name} suma {n} gol{'es' if n > 1 else ''} más. La cosa se pone interesante... 👀",
+            ]
+            msg = mensajes[hash(name) % len(mensajes)]
+            send_telegram(msg)
+    else:
+        print("ℹ️  Sin nuevos goles hoy, no se envía notificación.")
 
 
 if __name__ == "__main__":
