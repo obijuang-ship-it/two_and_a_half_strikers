@@ -47,7 +47,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border2) 30%,var(--border2) 70%,transparent);margin:1.25rem 1.25rem 0}
 
 .verdict{margin:1.25rem 1.25rem 0;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.875rem 1.25rem;display:flex;flex-direction:column;gap:5px}
-.v-line{font-size:15px;color:var(--text2);display:flex;align-items:center;gap:8px}
+.v-line{font-size:15px;color:var(--text2);display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
 .v-line strong{color:var(--text);font-weight:600}
 .v-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .v-dot.g{background:var(--green)}
@@ -89,6 +89,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .pcard-bar-fill{height:100%;border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)}
 .pcard.first .pcard-bar-fill{background:var(--gold)}
 .pcard.last .pcard-bar-fill{background:var(--red)}
+.pcard:not(.first):not(.last) .pcard-bar-fill{background:#4a5568}
 .pcard-bar-pct{font-size:13px;color:var(--text3);min-width:28px;text-align:right}
 
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
@@ -358,7 +359,7 @@ function buildRadar(data){
   data.forEach((d,i)=>{
     const[x,y]=pt(i,d.val);
     dots+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="#00ff87"/>`;
-    const[lx,ly]=pt(i,132);
+    const[lx,ly]=pt(i,145);
     const anc=lx<cx-4?'end':lx>cx+4?'start':'middle';
     labels+=`<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anc}" font-size="14" fill="#8b95a1" font-family="DM Sans,sans-serif">${d.label}</text>`;
     labels+=`<text x="${x.toFixed(1)}" y="${(y-8).toFixed(1)}" text-anchor="middle" font-size="14" font-weight="600" fill="#00ff87" font-family="Bebas Neue,sans-serif">${d.val}%</text>`;
@@ -366,7 +367,7 @@ function buildRadar(data){
   return `<div class="radar-card">
     <div class="radar-ttl">Rasgos del jugador</div>
     <div class="radar-sub">Percentiles vs delanteros de su liga</div>
-    <svg class="radar-svg" viewBox="0 0 340 320" width="100%" style="max-width:340px">
+    <svg class="radar-svg" viewBox="-20 -10 400 360" width="100%" style="max-width:360px">
       ${rings}${axes}${poly}${dots}${labels}
     </svg>
   </div>`;}
