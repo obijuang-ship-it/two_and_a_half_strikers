@@ -2,10 +2,11 @@ import requests
 import json
 import base64
 import os
+import time
 from datetime import datetime
 
 # ── CONFIG ──────────────────────────────────────────────
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "TU_TOKEN_AQUI")
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 REPO         = "obijuang-ship-it/two_and_a_half_strikers"
 JSON_PATH    = "goles.json"
 
@@ -14,19 +15,37 @@ PLAYERS = [
     {"owner": "Adolfo",      "name": "Dušan Vlahović",  "fotmobId": "737857"},
     {"owner": "Yeye",        "name": "Kylian Mbappé",   "fotmobId": "701154"},
 ]
-
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "application/json",
-    "Referer": "https://www.fotmob.com/",
-}
 # ────────────────────────────────────────────────────────
 
 
-def fetch_goals(fotmob_id):
+def get_fotmob_token():
+    """Get FotMob auth token from their init endpoint"""
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "es-ES,es;q=0.9",
+        "Origin": "https://www.fotmob.com",
+        "Referer": "https://www.fotmob.com/",
+    })
+    # Visit homepage first to get cookies
+    session.get("https://www.fotmob.com", timeout=10)
+    time.sleep(1)
+    return session
+
+
+def fetch_goals(session, fotmob_id):
     url = f"https://www.fotmob.com/api/playerData?id={fotmob_id}"
-    r = requests.get(url, headers=HEADERS, timeout=10)
-    r.raise_for_status()
+    r = session.get(url, timeout=15)
+    print(f"  Status: {r.status_code}, Content-Type: {r.headers.get('Content-Type','')}")
+    if r.status_code != 200:
+        raise Exception(f"HTTP {r.status_code}")
+    
+    # Check if we got JSON or HTML
+    ct = r.headers.get('Content-Type', '')
+    if 'html' in ct:
+        raise Exception("Got HTML instead of JSON — blocked")
+    
     data = r.json()
     total = 0
     entries = (data.get("careerStatistics", {})
@@ -60,20 +79,34 @@ def push_json(content, sha):
 
 
 def main():
+    print("Iniciando sesión en FotMob...")
+    session = get_fotmob_token()
+    
+    # Load existing goles to keep last known values if fetch fails
+    sha = get_file_sha()
+    existing = {}
+    if sha:
+        url = f"https://api.github.com/repos/{REPO}/contents/{JSON_PATH}"
+        r = requests.get(url, headers={"Authorization": f"token {GITHUB_TOKEN}"})
+        if r.status_code == 200:
+            raw = base64.b64decode(r.json()["content"]).decode()
+            for item in json.loads(raw):
+                if "fotmobId" in item and item.get("goles") is not None:
+                    existing[item["fotmobId"]] = item["goles"]
+
     print("Consultando FotMob...")
     result = []
     for p in PLAYERS:
         try:
-            goles = fetch_goals(p["fotmobId"])
-            print(f"  {p['name']}: {goles} goles")
+            time.sleep(1)  # be polite
+            goles = fetch_goals(session, p["fotmobId"])
+            print(f"  ✓ {p['name']}: {goles} goles")
         except Exception as e:
-            print(f"  {p['name']}: ERROR ({e})")
-            goles = None
+            print(f"  ✗ {p['name']}: ERROR ({e}) — manteniendo valor anterior")
+            goles = existing.get(p["fotmobId"], 0)
         result.append({**p, "goles": goles})
 
     result.append({"updated": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")})
-
-    sha = get_file_sha()
     push_json(result, sha)
 
 
