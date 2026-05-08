@@ -7,11 +7,12 @@ import base64
 from datetime import datetime
 
 # === CONFIGURACIÓN ===
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
+GITHUB_TOKEN   = os.environ.get("GITHUB_TOKEN", "")
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
-CHAT_ID = os.environ.get("CHAT_ID", "")
-REPO = "obijuang-ship-it/two_and_a_half_strikers"
-JSON_PATH = "goles.json"
+CHAT_ID        = os.environ.get("CHAT_ID", "")
+REPO           = "obijuang-ship-it/two_and_a_half_strikers"
+JSON_PATH      = "goles.json"
+APP_URL        = "https://obijuang-ship-it.github.io/two_and_a_half_strikers/"
 
 PLAYERS = [
     {"owner": "Juan Carlos", "name": "Luis Suárez",    "fotmobId": "792303", "slug": "luis-suarez"},
@@ -20,6 +21,14 @@ PLAYERS = [
 ]
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+
+MENSAJES = [
+    "⚽ ¡{nombre} ha marcado! Alguien va a tener que sacar la cartera... entra a ver quién 👉 {url}",
+    "🍽️ Huele a cena gratis. {nombre} acaba de marcar y la cosa se pone fea para alguien. ¿Para quién? 👉 {url}",
+    "😬 Ay, ay, ay... {nombre} ha metido gol. Hay quien debería ir pensando en el restaurante 👉 {url}",
+    "🔔 Alerta apuesta: {nombre} no perdona. La cena cada vez más cara para alguien 👉 {url}",
+    "💀 {nombre} acaba de complicarle la vida a alguien del grupo. Entra a ver el daño 👉 {url}",
+]
 
 
 def find_season_entries(obj):
@@ -126,51 +135,63 @@ def main():
     print("⚽ Extrayendo estadísticas desde FotMob…\n")
 
     old_data, sha = get_github_file()
+
+    # Construir mapa de goles anteriores — solo si el fetch fue exitoso (no null, no 0 por error)
     old_goals = {}
     for item in old_data:
-        if "fotmobId" in item:
-            old_goals[item["fotmobId"]] = item.get("goles", 0)
+        if "fotmobId" in item and isinstance(item.get("goles"), int):
+            old_goals[item["fotmobId"]] = item["goles"]
 
     result = []
     nuevos_goles = []
+    fetch_errors = 0
 
     for p in PLAYERS:
         print(f"Buscando {p['name']}…")
         try:
             stats = fetch_player_stats(p["fotmobId"], p["slug"])
-            goles = stats["goles"]
-            print(f"  ✓ {p['name']}: {goles} goles · {stats['asistencias']} asist · {stats['partidos']} PJ")
+            new_goals = stats["goles"]
+            print(f"  ✓ {p['name']}: {new_goals} goles · {stats['asistencias']} asist · {stats['partidos']} PJ")
 
-            prev = old_goals.get(p["fotmobId"], 0)
-            if goles > prev:
-                nuevos_goles.append((p["name"], p["owner"], goles - prev))
+            prev = old_goals.get(p["fotmobId"])
+
+            # Solo notificar si:
+            # 1. Teníamos un valor previo válido (no None)
+            # 2. El nuevo valor es MAYOR que el anterior
+            # 3. El nuevo valor es mayor que 0 (evita falsos positivos por reset)
+            if prev is not None and new_goals > prev and new_goals > 0:
+                nuevos_goles.append((p["name"], new_goals - prev))
+
+            result.append({
+                "owner":    p["owner"],
+                "name":     p["name"],
+                "fotmobId": p["fotmobId"],
+                "goles":    new_goals,
+            })
 
         except Exception as e:
             print(f"  ✗ Error: {e} — manteniendo valor anterior")
-            goles = old_goals.get(p["fotmobId"], 0)
-            stats = {"goles": goles, "asistencias": 0, "partidos": 0}
+            fetch_errors += 1
+            # Si hubo error en el fetch, guardamos el valor anterior SIN notificar
+            result.append({
+                "owner":    p["owner"],
+                "name":     p["name"],
+                "fotmobId": p["fotmobId"],
+                "goles":    old_goals.get(p["fotmobId"], 0),
+            })
 
-        result.append({
-            "owner":    p["owner"],
-            "name":     p["name"],
-            "fotmobId": p["fotmobId"],
-            "goles":    stats["goles"],
-        })
         time.sleep(1)
 
     result.append({"updated": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")})
     push_json(result, sha)
 
-    # Notificaciones Telegram
-    if nuevos_goles:
-        for name, owner, n in nuevos_goles:
-            mensajes = [
-                f"⚽ ¡{name} ha marcado {n} gol{'es' if n > 1 else ''}! Entra a la app a ver cómo va la apuesta 👀",
-                f"🔥 ¡Goool de {name}! ¿Quién va pagando la cena? Compruébalo en la app 🍽️",
-                f"💥 {name} suma {n} gol{'es' if n > 1 else ''} más. La cosa se pone interesante... 👀",
-            ]
-            msg = mensajes[hash(name) % len(mensajes)]
+    # Solo notificar si NO hubo errores de fetch (evita falsos positivos)
+    if fetch_errors == 0 and nuevos_goles:
+        for name, n in nuevos_goles:
+            msg = MENSAJES[hash(name) % len(MENSAJES)].format(nombre=name, n=n, url=APP_URL)
             send_telegram(msg)
+    elif fetch_errors > 0:
+        print(f"⚠️  {fetch_errors} error(es) de fetch — no se envían notificaciones para evitar falsos positivos")
     else:
         print("ℹ️  Sin nuevos goles hoy, no se envía notificación.")
 
