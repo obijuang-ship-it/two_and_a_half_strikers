@@ -3,21 +3,105 @@
     "owner": "Juan Carlos",
     "name": "Luis Suárez",
     "fotmobId": "792303",
-    "goles": 35
+    "goles": 35,
+    "asistencias": 8,
+    "partidos": 50,
+    "radar": [
+      {
+        "label": "Goles",
+        "val": 100
+      },
+      {
+        "label": "Oport. creadas",
+        "val": 100
+      },
+      {
+        "label": "Aéreo ganado",
+        "val": 72
+      },
+      {
+        "label": "Acc. defensivas",
+        "val": 82
+      },
+      {
+        "label": "Disparos",
+        "val": 100
+      },
+      {
+        "label": "Toques",
+        "val": 95
+      }
+    ]
   },
   {
     "owner": "Adolfo",
     "name": "Dušan Vlahović",
     "fotmobId": "737857",
-    "goles": 9
+    "goles": 9,
+    "asistencias": 2,
+    "partidos": 23,
+    "radar": [
+      {
+        "label": "Goles",
+        "val": 60
+      },
+      {
+        "label": "Oport. creadas",
+        "val": 32
+      },
+      {
+        "label": "Aéreo ganado",
+        "val": 46
+      },
+      {
+        "label": "Acc. defensivas",
+        "val": 29
+      },
+      {
+        "label": "Disparos",
+        "val": 63
+      },
+      {
+        "label": "Toques",
+        "val": 31
+      }
+    ]
   },
   {
     "owner": "Yeye",
     "name": "Kylian Mbappé",
     "fotmobId": "701154",
-    "goles": 42
+    "goles": 42,
+    "asistencias": 5,
+    "partidos": 44,
+    "radar": [
+      {
+        "label": "Goles",
+        "val": 100
+      },
+      {
+        "label": "Oport. creadas",
+        "val": 100
+      },
+      {
+        "label": "Aéreo ganado",
+        "val": 21
+      },
+      {
+        "label": "Acc. defensivas",
+        "val": 15
+      },
+      {
+        "label": "Disparos",
+        "val": 100
+      },
+      {
+        "label": "Toques",
+        "val": 100
+      }
+    ]
   },
   {
-    "updated": "2026-05-08T22:20:16Z"
+    "updated": "2026-05-08T22:40:17Z"
   }
 ]
