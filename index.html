@@ -80,6 +80,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .pcard-goals{font-family:var(--font-display);font-size:62px;letter-spacing:0.02em;line-height:1;color:var(--text)}
 .pcard.first .pcard-goals{color:var(--gold)}
 .pcard.last .pcard-goals{color:var(--red)}
+.pcard.mid .pcard-goals{color:var(--green)}
 .pcard-glbl{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-top:-2px}
 .pcard-arrow{font-size:16px;color:var(--text3);margin-top:6px;transition:color .15s}
 .pcard:hover .pcard-arrow{color:var(--green)}
@@ -89,7 +90,10 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .pcard-bar-fill{height:100%;border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)}
 .pcard.first .pcard-bar-fill{background:var(--gold)}
 .pcard.last .pcard-bar-fill{background:var(--red)}
-.pcard:not(.first):not(.last) .pcard-bar-fill{background:#4a5568}
+.pcard:not(.first):not(.last) .pcard-bar-fill{background:#00ff87}
+.pcard.mid{border-color:rgba(0,255,135,.25)}
+.pcard.mid::before{background:#00ff87}
+.pcard.mid:hover{border-color:rgba(0,255,135,.5)}
 .pcard-bar-pct{font-size:13px;color:var(--text3);min-width:28px;text-align:right}
 
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
@@ -136,6 +140,18 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .sheet-error{text-align:center;padding:2rem 1.25rem;color:var(--red);font-size:13px;line-height:1.6}
 
 .spin-anim{animation:spin .8s linear infinite;display:inline-block}
+.season-chip{cursor:pointer;transition:background .15s;user-select:none}
+.season-chip:hover{background:var(--border2)}
+.season-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.season-modal.open{opacity:1;pointer-events:all}
+.season-panel{background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:1.5rem;width:90%;max-width:400px}
+.season-panel h3{font-family:var(--font-display);font-size:20px;letter-spacing:.04em;color:var(--text);margin-bottom:1rem}
+.season-item{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-radius:8px;cursor:pointer;transition:background .15s;border:1px solid transparent}
+.season-item:hover{background:var(--card2)}
+.season-item.active{border-color:var(--green);background:rgba(0,255,135,.05)}
+.season-item-name{font-size:16px;font-weight:600;color:var(--text)}
+.season-item-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.season-close{background:var(--border);border:none;color:var(--text2);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;float:right;margin-top:-4px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
@@ -169,7 +185,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
       <div class="logo-title">2&frac12; <em>Strikers</em></div>
     </div>
     <div class="header-right">
-      <div class="season-chip">25 / 26</div>
+      <div class="season-chip" id="season-chip" onclick="openSeasonModal()">25 / 26</div>
       <button class="sync-mini" id="sync-btn" onclick="syncAll()">
         <span id="sync-icon">↻</span> Actualizar
       </button>
@@ -191,6 +207,15 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
     <div id="sheet-content">
       <div class="sheet-loading">Cargando perfil...</div>
     </div>
+  </div>
+</div>
+
+<!-- SEASON MODAL -->
+<div class="season-modal" id="season-modal" onclick="onSeasonModalClick(event)">
+  <div class="season-panel">
+    <button class="season-close" onclick="closeSeasonModal()">✕</button>
+    <h3>Temporadas</h3>
+    <div id="season-list"></div>
   </div>
 </div>
 
@@ -218,7 +243,7 @@ function renderCards(){
   const r=ranked();const tied=allTied();const mx=maxGoals();
   document.getElementById('cards').innerHTML=state.map((p,i)=>{
     const pos=tied?-1:r.findIndex(x=>x.fotmobId===p.fotmobId)+1;
-    const cls=pos===1?'first':pos===3?'last':'';
+    const cls=pos===1?'first':pos===3?'last':'mid';
     const rankLabel=pos===1?'L\u00edder':pos===2?'En juego':pos===3?'\u00daltimo':'\u2014';
     const rankCls=pos===1?'rank-1':pos===3?'rank-3':'rank-2';
     const pct=Math.round((p.goles/mx)*100);
@@ -257,9 +282,10 @@ function renderVerdict(){
     <div class="v-line"><span class="v-dot y"></span> Diferencia: <strong>${diff} gol${diff!==1?'es':''}</strong></div>`;
 }
 
-function render(){renderCards();renderVerdict();}
+function render(){renderWithData(state, false);}
 
 async function syncAll(){
+  if(currentSeason !== "2526"){return;}
   const btn=document.getElementById('sync-btn');
   const icon=document.getElementById('sync-icon');
   btn.disabled=true;icon.className='spin-anim';icon.textContent='\u21bb';
@@ -378,6 +404,162 @@ function closeProfile(){
 }
 function onOverlayClick(e){
   if(e.target===document.getElementById('overlay'))closeProfile();
+}
+
+// ── SEASONS ──────────────────────────────────────────
+const SEASONS = [
+  {
+    id: '2526',
+    label: '25 / 26',
+    active: true,
+    players: null, // loaded from goles.json
+  },
+  {
+    id: '2425',
+    label: '24 / 25',
+    active: false,
+    winner: 'Tú',
+    players: [
+      {
+        owner: 'Tú', name: 'Viktor Gyökeres', fotmobId: '961995',
+        img: 'https://fotmob-proxy.obijuang.workers.dev/?type=img&id=961995',
+        goles: 54, asistencias: 17, partidos: 50,
+        radar: [
+          {label:'Goles', val:100},
+          {label:'Oport. creadas', val:82},
+          {label:'Aéreo ganado', val:78},
+          {label:'Acc. defensivas', val:22},
+          {label:'Disparos', val:100},
+          {label:'Toques', val:91},
+        ]
+      },
+      {
+        owner: 'Yeye', name: 'Kylian Mbappé', fotmobId: '701154',
+        img: 'https://fotmob-proxy.obijuang.workers.dev/?type=img&id=701154',
+        goles: 43, asistencias: 6, partidos: 48,
+        radar: [
+          {label:'Goles', val:100},
+          {label:'Oport. creadas', val:90},
+          {label:'Aéreo ganado', val:34},
+          {label:'Acc. defensivas', val:25},
+          {label:'Disparos', val:98},
+          {label:'Toques', val:64},
+        ]
+      },
+      {
+        owner: 'Adolfo', name: 'Dušan Vlahović', fotmobId: '737857',
+        img: 'https://fotmob-proxy.obijuang.workers.dev/?type=img&id=737857',
+        goles: 15, asistencias: 3, partidos: 38,
+        radar: [
+          {label:'Goles', val:72},
+          {label:'Oport. creadas', val:55},
+          {label:'Aéreo ganado', val:88},
+          {label:'Acc. defensivas', val:31},
+          {label:'Disparos', val:80},
+          {label:'Toques', val:60},
+        ]
+      },
+    ]
+  }
+];
+
+let currentSeason = '2526';
+
+function getSeasonData(id) {
+  const s = SEASONS.find(x => x.id === id);
+  if (id === '2526') return state;
+  return s ? s.players : [];
+}
+
+function openSeasonModal() {
+  renderSeasonList();
+  document.getElementById('season-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSeasonModal() {
+  document.getElementById('season-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function onSeasonModalClick(e) {
+  if (e.target === document.getElementById('season-modal')) closeSeasonModal();
+}
+
+function renderSeasonList() {
+  const el = document.getElementById('season-list');
+  el.innerHTML = SEASONS.map(s => `
+    <div class="season-item ${s.id === currentSeason ? 'active' : ''}" onclick="selectSeason('${s.id}')">
+      <div>
+        <div class="season-item-name">${s.label}</div>
+        <div class="season-item-sub">${s.id === '2526' ? 'Temporada actual' : s.winner ? '🏆 Ganó ' + s.winner : 'Finalizada'}</div>
+      </div>
+      ${s.id === currentSeason ? '<span style="color:var(--green);font-size:18px;">✓</span>' : ''}
+    </div>`).join('');
+}
+
+function selectSeason(id) {
+  currentSeason = id;
+  const s = SEASONS.find(x => x.id === id);
+  document.getElementById('season-chip').textContent = s.label;
+  closeSeasonModal();
+  renderWithData(getSeasonData(id), id !== '2526');
+}
+
+function renderWithData(players, readonly) {
+  const r = [...players].sort((a,b) => b.goles - a.goles);
+  const tied = players.every(p => p.goles === players[0].goles);
+  const mx = Math.max(...players.map(p => p.goles), 1);
+
+  document.getElementById('cards').innerHTML = players.map((p, i) => {
+    const pos = tied ? -1 : r.findIndex(x => x.fotmobId === p.fotmobId) + 1;
+    const cls = pos === 1 ? 'first' : pos === 3 ? 'last' : 'mid';
+    const rankLabel = pos === 1 ? 'Líder' : pos === 2 ? 'En juego' : pos === 3 ? 'Último' : '—';
+    const rankCls = pos === 1 ? 'rank-1' : pos === 3 ? 'rank-3' : 'rank-2';
+    const pct = Math.round((p.goles / mx) * 100);
+    return `<div class="pcard ${cls}" onclick="openProfileData(${JSON.stringify(p).replace(/"/g, '&quot;')})">
+      <div class="pcard-inner">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <img src="${p.img}" alt="${p.name}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;background:var(--border);flex-shrink:0;" onerror="this.style.display='none'">
+          <div class="pcard-left">
+            <div class="pcard-meta"><span class="pcard-rank ${rankCls}">${rankLabel}</span></div>
+            <div class="pcard-owner">${p.owner}</div>
+            <div class="pcard-player">${p.name}</div>
+          </div>
+        </div>
+        <div class="pcard-right">
+          <div class="pcard-goals">${p.goles}</div>
+          <div class="pcard-glbl">goles</div>
+          <div class="pcard-arrow">Ver perfil →</div>
+        </div>
+      </div>
+      <div class="pcard-bar-wrap">
+        <div class="pcard-bar-bg"><div class="pcard-bar-fill" style="width:${pct}%"></div></div>
+        <div class="pcard-bar-pct">${pct}%</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // verdict
+  const el = document.getElementById('verdict');
+  const statusEl = el.querySelector('.sync-status');
+  if (statusEl) statusEl.remove();
+  if (tied) {
+    el.innerHTML = `<div class="v-line"><span class="v-dot y"></span> Empate total — la temporada está abierta</div>`;
+    return;
+  }
+  const diff = r[0].goles - r[r.length-1].goles;
+  el.innerHTML = `
+    <div class="v-line"><span class="v-dot r"></span> <strong>${r[r.length-1].owner}</strong> va pagando la cena</div>
+    <div class="v-line"><span class="v-dot g"></span> <strong>${r[0].owner}</strong> elige el restaurante</div>
+    <div class="v-line"><span class="v-dot y"></span> Diferencia: <strong>${diff} gol${diff!==1?'es':''}</strong></div>
+    ${readonly ? '<div class="sync-status">Temporada finalizada</div>' : ''}`;
+}
+
+function openProfileData(p) {
+  const overlay = document.getElementById('overlay');
+  const sc = document.getElementById('sheet-content');
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  sc.innerHTML = buildProfile(p);
 }
 
 load();render();
