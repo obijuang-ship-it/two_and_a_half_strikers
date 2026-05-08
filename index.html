@@ -275,7 +275,7 @@ async function syncAll(){
 }
 
 async function fetchGoals(id){
-  const r=await fetch(`https://www.fotmob.com/api/playerData?id=${id}`);
+  const r=await fetch(`https://fotmob-proxy.obijuang.workers.dev/?id=${id}`);
   if(!r.ok)throw new Error();
   const d=await r.json();
   let g=0;
@@ -292,7 +292,7 @@ async function openProfile(idx){
   overlay.classList.add('open');
   document.body.style.overflow='hidden';
   try{
-    const r=await fetch(`https://www.fotmob.com/api/playerData?id=${p.fotmobId}`);
+    const r=await fetch(`https://fotmob-proxy.obijuang.workers.dev/?id=${p.fotmobId}`);
     if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json();
     sc.innerHTML=buildProfile(p,d);
