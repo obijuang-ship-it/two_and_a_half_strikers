@@ -3,9 +3,9 @@
     "owner": "Juan Carlos",
     "name": "Luis Suárez",
     "fotmobId": "792303",
-    "goles": 35,
+    "goles": 36,
     "asistencias": 8,
-    "partidos": 50,
+    "partidos": 51,
     "radar": [
       {
         "label": "Goles",
@@ -85,11 +85,11 @@
       },
       {
         "label": "Aéreo ganado",
-        "val": 23
+        "val": 24
       },
       {
         "label": "Acc. defensivas",
-        "val": 16
+        "val": 17
       },
       {
         "label": "Disparos",
@@ -102,6 +102,6 @@
     ]
   },
   {
-    "updated": "2026-05-11T11:31:54Z"
+    "updated": "2026-05-12T10:38:58Z"
   }
 ]
