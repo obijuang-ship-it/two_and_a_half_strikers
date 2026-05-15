@@ -47,7 +47,7 @@
       },
       {
         "label": "Oport. creadas",
-        "val": 33
+        "val": 32
       },
       {
         "label": "Aéreo ganado",
@@ -55,7 +55,7 @@
       },
       {
         "label": "Acc. defensivas",
-        "val": 27
+        "val": 26
       },
       {
         "label": "Disparos",
@@ -63,7 +63,7 @@
       },
       {
         "label": "Toques",
-        "val": 35
+        "val": 34
       }
     ]
   },
@@ -72,8 +72,8 @@
     "name": "Kylian Mbappé",
     "fotmobId": "701154",
     "goles": 42,
-    "asistencias": 5,
-    "partidos": 44,
+    "asistencias": 6,
+    "partidos": 45,
     "radar": [
       {
         "label": "Goles",
@@ -89,7 +89,7 @@
       },
       {
         "label": "Acc. defensivas",
-        "val": 15
+        "val": 14
       },
       {
         "label": "Disparos",
@@ -102,6 +102,6 @@
     ]
   },
   {
-    "updated": "2026-05-14T10:27:21Z"
+    "updated": "2026-05-15T10:33:43Z"
   }
 ]
