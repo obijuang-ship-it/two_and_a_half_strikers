@@ -43,7 +43,7 @@
     "radar": [
       {
         "label": "Goles",
-        "val": 65
+        "val": 66
       },
       {
         "label": "Oport. creadas",
@@ -63,7 +63,7 @@
       },
       {
         "label": "Toques",
-        "val": 37
+        "val": 38
       }
     ]
   },
@@ -71,9 +71,9 @@
     "owner": "Yeye",
     "name": "Kylian Mbappé",
     "fotmobId": "701154",
-    "goles": 42,
+    "goles": 43,
     "asistencias": 6,
-    "partidos": 46,
+    "partidos": 47,
     "radar": [
       {
         "label": "Goles",
@@ -85,11 +85,11 @@
       },
       {
         "label": "Aéreo ganado",
-        "val": 23
+        "val": 22
       },
       {
         "label": "Acc. defensivas",
-        "val": 16
+        "val": 15
       },
       {
         "label": "Disparos",
@@ -102,6 +102,6 @@
     ]
   },
   {
-    "updated": "2026-05-23T10:00:20Z"
+    "updated": "2026-05-24T10:01:29Z"
   }
 ]
