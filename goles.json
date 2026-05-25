@@ -3,9 +3,9 @@
     "owner": "Juan Carlos",
     "name": "Luis Suárez",
     "fotmobId": "792303",
-    "goles": 37,
+    "goles": 38,
     "asistencias": 8,
-    "partidos": 52,
+    "partidos": 53,
     "radar": [
       {
         "label": "Goles",
@@ -37,33 +37,33 @@
     "owner": "Adolfo",
     "name": "Dušan Vlahović",
     "fotmobId": "737857",
-    "goles": 10,
+    "goles": 12,
     "asistencias": 2,
-    "partidos": 25,
+    "partidos": 26,
     "radar": [
       {
         "label": "Goles",
-        "val": 66
+        "val": 71
       },
       {
         "label": "Oport. creadas",
-        "val": 36
+        "val": 51
       },
       {
         "label": "Aéreo ganado",
-        "val": 55
+        "val": 58
       },
       {
         "label": "Acc. defensivas",
-        "val": 29
+        "val": 27
       },
       {
         "label": "Disparos",
-        "val": 68
+        "val": 69
       },
       {
         "label": "Toques",
-        "val": 38
+        "val": 42
       }
     ]
   },
@@ -89,7 +89,7 @@
       },
       {
         "label": "Acc. defensivas",
-        "val": 15
+        "val": 13
       },
       {
         "label": "Disparos",
@@ -102,6 +102,6 @@
     ]
   },
   {
-    "updated": "2026-05-24T10:01:29Z"
+    "updated": "2026-05-25T11:57:42Z"
   }
 ]
