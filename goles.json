@@ -21,15 +21,15 @@
       },
       {
         "label": "Acc. defensivas",
-        "val": 64
+        "val": 63
       },
       {
         "label": "Disparos",
-        "val": 70
+        "val": 69
       },
       {
         "label": "Toques",
-        "val": 69
+        "val": 68
       }
     ]
   },
@@ -77,7 +77,7 @@
     "radar": [
       {
         "label": "Goles",
-        "val": 98
+        "val": 100
       },
       {
         "label": "Oport. creadas",
@@ -93,15 +93,15 @@
       },
       {
         "label": "Disparos",
-        "val": 98
+        "val": 100
       },
       {
         "label": "Toques",
-        "val": 97
+        "val": 100
       }
     ]
   },
   {
-    "updated": "2026-07-04T10:18:50Z"
+    "updated": "2026-07-05T10:23:58Z"
   }
 ]
