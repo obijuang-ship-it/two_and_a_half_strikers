@@ -17,7 +17,7 @@
       },
       {
         "label": "Aéreo ganado",
-        "val": 39
+        "val": 40
       },
       {
         "label": "Acc. defensivas",
@@ -89,11 +89,11 @@
       },
       {
         "label": "Acc. defensivas",
-        "val": 10
+        "val": 9
       },
       {
         "label": "Disparos",
-        "val": 98
+        "val": 100
       },
       {
         "label": "Toques",
@@ -102,6 +102,6 @@
     ]
   },
   {
-    "updated": "2026-07-18T09:39:43Z"
+    "updated": "2026-07-19T09:57:36Z"
   }
 ]
