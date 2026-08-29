@@ -29,7 +29,7 @@
       },
       {
         "label": "Toques",
-        "val": 55
+        "val": 73
       }
     ]
   },
@@ -81,7 +81,7 @@
       },
       {
         "label": "Oport. creadas",
-        "val": 82
+        "val": 80
       },
       {
         "label": "Aéreo ganado",
@@ -89,7 +89,7 @@
       },
       {
         "label": "Acc. defensivas",
-        "val": 6
+        "val": 9
       },
       {
         "label": "Disparos",
@@ -97,11 +97,11 @@
       },
       {
         "label": "Toques",
-        "val": 100
+        "val": 94
       }
     ]
   },
   {
-    "updated": "2026-08-28T20:08:16Z"
+    "updated": "2026-08-29T13:46:04Z"
   }
 ]
