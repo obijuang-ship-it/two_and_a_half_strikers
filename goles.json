@@ -29,7 +29,7 @@
       },
       {
         "label": "Toques",
-        "val": 57
+        "val": 52
       }
     ]
   },
@@ -77,11 +77,11 @@
     "radar": [
       {
         "label": "Goles",
-        "val": 85
+        "val": 86
       },
       {
         "label": "Oport. creadas",
-        "val": 68
+        "val": 69
       },
       {
         "label": "Aéreo ganado",
@@ -89,7 +89,7 @@
       },
       {
         "label": "Acc. defensivas",
-        "val": 0
+        "val": 2
       },
       {
         "label": "Disparos",
@@ -102,6 +102,6 @@
     ]
   },
   {
-    "updated": "2026-09-10T12:50:17Z"
+    "updated": "2026-09-11T12:45:09Z"
   }
 ]
