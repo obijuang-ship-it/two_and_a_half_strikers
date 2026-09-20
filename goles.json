@@ -9,27 +9,27 @@
     "radar": [
       {
         "label": "Goles",
-        "val": 90
+        "val": 93
       },
       {
         "label": "Oport. creadas",
-        "val": 14
+        "val": 33
       },
       {
         "label": "Aéreo ganado",
-        "val": 14
+        "val": 17
       },
       {
         "label": "Acc. defensivas",
-        "val": 41
+        "val": 43
       },
       {
         "label": "Disparos",
-        "val": 72
+        "val": 70
       },
       {
         "label": "Toques",
-        "val": 69
+        "val": 83
       }
     ]
   },
@@ -43,7 +43,7 @@
     "radar": [
       {
         "label": "Goles",
-        "val": 89
+        "val": 87
       },
       {
         "label": "Oport. creadas",
@@ -55,15 +55,15 @@
       },
       {
         "label": "Acc. defensivas",
-        "val": 9
+        "val": 8
       },
       {
         "label": "Disparos",
-        "val": 71
+        "val": 74
       },
       {
         "label": "Toques",
-        "val": 37
+        "val": 39
       }
     ]
   },
@@ -77,7 +77,7 @@
     "radar": [
       {
         "label": "Goles",
-        "val": 96
+        "val": 94
       },
       {
         "label": "Oport. creadas",
@@ -89,7 +89,7 @@
       },
       {
         "label": "Acc. defensivas",
-        "val": 26
+        "val": 24
       },
       {
         "label": "Disparos",
@@ -102,6 +102,6 @@
     ]
   },
   {
-    "updated": "2026-09-19T12:24:58Z"
+    "updated": "2026-09-20T12:59:09Z"
   }
 ]
