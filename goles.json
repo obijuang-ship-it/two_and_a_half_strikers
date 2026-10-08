@@ -85,11 +85,11 @@
       },
       {
         "label": "Aéreo ganado",
-        "val": 12
+        "val": 16
       },
       {
         "label": "Acc. defensivas",
-        "val": 20
+        "val": 24
       },
       {
         "label": "Disparos",
@@ -102,6 +102,6 @@
     ]
   },
   {
-    "updated": "2026-10-07T15:25:51Z"
+    "updated": "2026-10-08T15:27:50Z"
   }
 ]
