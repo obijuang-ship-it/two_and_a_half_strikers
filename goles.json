@@ -13,23 +13,23 @@
       },
       {
         "label": "Oport. creadas",
-        "val": 30
+        "val": 28
       },
       {
         "label": "Aéreo ganado",
-        "val": 17
+        "val": 38
       },
       {
         "label": "Acc. defensivas",
-        "val": 27
+        "val": 34
       },
       {
         "label": "Disparos",
-        "val": 63
+        "val": 66
       },
       {
         "label": "Toques",
-        "val": 73
+        "val": 86
       }
     ]
   },
@@ -47,11 +47,11 @@
       },
       {
         "label": "Oport. creadas",
-        "val": 30
+        "val": 28
       },
       {
         "label": "Aéreo ganado",
-        "val": 10
+        "val": 5
       },
       {
         "label": "Acc. defensivas",
@@ -59,11 +59,11 @@
       },
       {
         "label": "Disparos",
-        "val": 82
+        "val": 80
       },
       {
         "label": "Toques",
-        "val": 55
+        "val": 52
       }
     ]
   },
@@ -102,6 +102,6 @@
     ]
   },
   {
-    "updated": "2026-10-09T15:10:32Z"
+    "updated": "2026-10-10T14:23:39Z"
   }
 ]
