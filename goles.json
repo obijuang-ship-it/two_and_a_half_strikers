@@ -81,15 +81,15 @@
       },
       {
         "label": "Oport. creadas",
-        "val": 90
+        "val": 88
       },
       {
         "label": "Aéreo ganado",
-        "val": 14
+        "val": 13
       },
       {
         "label": "Acc. defensivas",
-        "val": 24
+        "val": 23
       },
       {
         "label": "Disparos",
@@ -102,6 +102,6 @@
     ]
   },
   {
-    "updated": "2026-10-15T13:16:31Z"
+    "updated": "2026-10-16T13:08:49Z"
   }
 ]
