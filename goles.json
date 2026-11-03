@@ -17,7 +17,7 @@
       },
       {
         "label": "Aéreo ganado",
-        "val": 47
+        "val": 44
       },
       {
         "label": "Acc. defensivas",
@@ -51,7 +51,7 @@
       },
       {
         "label": "Aéreo ganado",
-        "val": 52
+        "val": 50
       },
       {
         "label": "Acc. defensivas",
@@ -102,6 +102,6 @@
     ]
   },
   {
-    "updated": "2026-11-02T18:06:37Z"
+    "updated": "2026-11-03T16:01:42Z"
   }
 ]
