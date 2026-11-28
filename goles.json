@@ -29,7 +29,7 @@
       },
       {
         "label": "Toques",
-        "val": 86
+        "val": 83
       }
     ]
   },
@@ -51,11 +51,11 @@
       },
       {
         "label": "Aéreo ganado",
-        "val": 53
+        "val": 50
       },
       {
         "label": "Acc. defensivas",
-        "val": 55
+        "val": 52
       },
       {
         "label": "Disparos",
@@ -63,7 +63,7 @@
       },
       {
         "label": "Toques",
-        "val": 77
+        "val": 78
       }
     ]
   },
@@ -89,7 +89,7 @@
       },
       {
         "label": "Acc. defensivas",
-        "val": 16
+        "val": 14
       },
       {
         "label": "Disparos",
@@ -102,6 +102,6 @@
     ]
   },
   {
-    "updated": "2026-11-27T18:01:02Z"
+    "updated": "2026-11-28T16:45:36Z"
   }
 ]
